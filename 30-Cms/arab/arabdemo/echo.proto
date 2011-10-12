@@ -1,0 +1,22 @@
+option cc_generic_services = true;
+option py_generic_services = true;
+import "arab/types.proto";
+
+package echo;
+message EmptyMessage
+{};
+message EchoRequest
+{
+  required string message = 1;
+};
+
+message EchoResponse
+{
+  required Arab.ErrorCode error = 1;
+  required string response = 2;
+};
+service EchoService
+{
+  rpc Echo(EchoRequest) returns (EchoResponse);
+  rpc EchoTunnelMsg(EmptyMessage) returns (Arab.TunnelMsg);
+};

@@ -1,0 +1,27 @@
+package Arab;
+
+message ErrorCode
+{
+  enum Code{
+    OK = 0;
+    TIME_OUT = 1;
+    NOT_IMPL = 2;
+  }
+  required Code error_code = 1 [default = OK];
+};
+
+message TunnelMsg
+{
+  required ErrorCode error = 1;
+  required string message_type = 2;
+  optional bytes message_content = 3;
+};
+
+message ErrResp
+{
+  required ErrorCode error = 1;
+};
+
+
+
+

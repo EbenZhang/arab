@@ -1,0 +1,220 @@
+from sconsmake import *
+
+variables = dir()
+if 'TargetType' not in variables:
+  TargetType = 'exe'
+  
+if 'no_warning_include_path' not in variables:
+  no_warning_include_path = []
+  
+if 'compile_flags_linux' not in variables:
+  compile_flags_linux = []
+if 'compile_flags_win32' not in variables:
+  compile_flags_win32 = []
+
+
+if 'include_path' not in variables:
+  include_path = []
+ 
+#add 'no_warning_include_path' to 'include_path'
+#so scons will parse dependencies in those dir
+#otherwise scons will not parse no_warning_include_path
+#because no_warning_include_path is specified by -isystem,not CPP_PATH
+include_path.extend(no_warning_include_path)
+
+if 'define_macros' not in variables:
+  define_macros = []
+
+if 'vc_ver' not in variables:
+  vc_ver = '6.0'
+  
+if 'source_files' not in variables:
+  source_files = []
+  
+if 'install_dir_win32_debug' not in variables:
+  install_dir_win32_debug = '.'
+if 'install_dir_win32_release' not in variables:
+  install_dir_win32_release = '.'
+if 'install_dir_linux_debug' not in variables:
+  install_dir_linux_debug = '.'
+if 'install_dir_linux_release' not in variables:
+  install_dir_linux_release = '.'
+  
+if 'incs_for_dsp' not in variables:
+  incs_for_dsp = []  
+  
+####### ignore warnings in these dirs
+if no_warning_include_path:
+  system_include_flags = ["-isystem" + inc_path for inc_path in no_warning_include_path]
+else:
+  system_include_flags = []
+env_base = Environment(MSVC_VERSION = vc_ver,CPPPATH = include_path,CPPDEFINES = define_macros)
+  
+####### basic compile flags of gcc under linux
+linux_env_base = env_base.Clone()
+linux_env_base.Append(
+  CCFLAGS = ['-g','-Wall','-Wno-switch','-D_LINUX_'],
+  CXXFLAGS = ['-Wnon-virtual-dtor', '-Wno-ctor-dtor-privacy',],
+  LIBPATH = ['/usr/lib','/usr/local/lib'],
+  LIBS = ['rt']
+ )
+
+linux_env_base.Append(
+  CCFLAGS = compile_flags_linux
+ )
+
+if system_include_flags:
+  linux_env_base.Append(
+    CCFLAGS = system_include_flags
+  )
+
+####### debug compile flags
+linux_env_debug = linux_env_base.Clone()
+linux_env_debug.Append(
+  LIBPATH = lib_path_linux_debug, 
+  CCFLAGS = ['-DDEBUG','-D_DEBUG'],
+  PROGRAM_NAME = [program_name_debug,],
+  LIBS = libs_kdc_linux_debug,
+  )
+
+###### release compile flags
+linux_env_release = linux_env_base.Clone()
+linux_env_release.Append(
+  LIBPATH = lib_path_linux_release, 
+  CCFLAGS = ['-O2','-DNDEBUG'],
+  PROGRAM_NAME = [program_name_release,],
+  LIBS = libs_kdc_linux_release,
+  )
+  
+  
+####### basic compile flags of vc under win32
+win32_env_base = env_base.Clone()
+win32_env_base.Append(
+  CCFLAGS = [
+    #'/Fd${TARGET}.pdb', # pdb per object allows --jobs=
+    #'/WX',          # warnings are errors
+    '/GX',          # C++ exception
+    '/Zc:forScope', # handle 'for (int i = 0 ...)' right
+    '/wd4996',      # ignore POSIX deprecated warnings
+    '/GR',          # rtti
+
+    # promote certain level 4 warnings
+    '/w14701',     # potentially uninitialized var
+    '/w14702',     # unreachable code
+    '/w14706',     # assignment within a conditional
+    '/w14709',     # comma operator within array index
+    '/w14063',     # case 'identifier' is not a valid value for switch of enum
+    '/w14064',     # switch of incomplete enum 'enumeration'
+    '/w14057',     # 'identifier1' indirection to slightly different base
+                   #   types from 'identifier2'
+    '/w14263',     # member function does not override any base class virtual
+                   #   member function
+    '/w14266',     # no override available for virtual memberfunction from base
+                   #  'type'; function is hidden
+    '/w14296',     # expression is always false
+    '/w14355',     # 'this' : used in base member initializer list
+  ],
+  LINKFLAGS = [
+    '/nodefaultlib:"nafxcwd.lib"',
+    '/nodefaultlib:"libcd.lib"',
+    '/nodefaultlib:"nafxcw.lib"',
+    '/nodefaultlib:"libc.lib"',
+    '/nodefaultlib:"LIBC.lib"',
+    '/debug',
+  ],
+  CPPDEFINES = [
+    '_ATL_CSTRING_EXPLICIT_CONSTRUCTORS',
+    # TODO: encapsulate all string operations that are not based
+    # on std::string/std::wstring and make sure we use the safest versions
+    # available on all platforms.
+    '_CRT_SECURE_NO_WARNINGS',
+    '_SCL_SECURE_NO_WARNINGS',
+    '_USE_32BIT_TIME_T',
+    'WIN32',
+    'WIN32_LEAN_AND_MEAN',
+    '_WIN32',
+    'WINVER=0x0500',
+    '_WIN32_WINNT=0x0501',
+    '_WIN32_IE=0x0501',
+    # The Vista platform SDK 6.0 needs at least
+    # this NTDDI version or else the headers
+    # that LMI includes from it won't compile.
+    'NTDDI_VERSION=NTDDI_WINXP',
+
+    '_AFXDLL',
+  ],
+)
+
+win32_env_base.Append(CPPDEFINES = compile_flags_win32)
+win32_env_debug = win32_env_base.Clone()
+win32_env_debug.Append(
+  LIBPATH = lib_path_win32_debug, 
+  CPPDEFINES = ['DEBUG','_DEBUG'],
+  PROGRAM_NAME = [program_name_debug,],
+  LIBS = libs_kdc_win32_debug,
+  )
+    
+win32_env_debug.Prepend(
+  CCFLAGS = [
+      '/ZI',     # enable debugging
+      '/Od',     # disable optimizations
+      '/MDd',    # link with MSVCRTD.LIB dynamic debug lib
+      '/RTC1',   # enable runtime checks
+  ],
+)
+
+win32_env_release = win32_env_base.Clone()
+win32_env_release.Append(
+  LIBPATH = lib_path_win32_release, 
+  CPPDEFINES = ['NDEBUG'],
+  PROGRAM_NAME = [program_name_release,],
+  LIBS = libs_kdc_win32_release,
+  )
+
+win32_env_release.Prepend(
+  CCFLAGS=[
+      '/Zi',     # enable debugging
+      '/O1',     # optimize for size
+      '/MD',     # link with MSVCRT.LIB (multi-threaded, dynamic linked crt)
+      '/GS',     # enable security checks
+  ],
+  LINKFLAGS = [
+    '/safeseh',
+  ],
+)
+
+###### debug or release
+# default mode is release
+# you could use 'scons mode=debug' to compile debug version
+mode = ARGUMENTS.get('mode', 'release')
+
+install_path = '.'
+import sys
+if sys.platform.startswith('linux'):
+  if mode.upper() != 'DEBUG':
+    the_env = linux_env_release
+    install_path = install_dir_linux_release
+  else:
+    the_env = linux_env_debug
+    install_path = install_dir_linux_debug
+else:
+  if mode.upper() != 'DEBUG':
+    the_env = win32_env_release
+    install_path = install_dir_win32_release
+  else:
+    the_env = win32_env_debug
+    install_path = install_dir_win32_debug
+    
+if TargetType.lower() == 'exe':
+  productor = the_env.Program(the_env['PROGRAM_NAME'], source_files)
+elif TargetType.lower() == 'lib':
+  productor = the_env.Library(the_env['PROGRAM_NAME'], source_files)
+elif TargetType.lower() == 'dll':
+  productor = the_env.SharedLibrary(the_env['PROGRAM_NAME'], source_files)
+else:
+  print "--------------------unknown target type-----------------------"
+  sys.exit(1)
+
+#the_env.MSVSProject("vrs.dsp",srcs=source_files,incs=incs_for_dsp,variant = 'Release')
+
+Default(the_env.Install(install_path,productor))
