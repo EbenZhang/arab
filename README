@@ -1,0 +1,3 @@
+Arab is a RPC framework based on ProtoBuf and ZMQ.
+
+You can write your client in Python and C++, and write your server in C++.
