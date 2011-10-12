@@ -1,3 +1,42 @@
+== Introduction ==
 Arab is a RPC framework based on ProtoBuf and ZMQ.
 
-You can write your client in Python and C++, and write your server in C++.
+You can write client programs in Python, and implement RPC services server in C++.
+
+== Licence ==
+Arab is licensed under the Apache Licence, Version 2.0
+(http://www.apache.org/licenses/LICENSE-2.0.html).
+
+== Credits ==
+zmq-rpc: http://code.google.com/p/zmq-rpc/, Arab's C++ Server is based on this project, thanks for his great job.
+Kedacom: http://kedacom.com. Kedacom was my company. Thanks to my leader, so Arab could be placed on github
+
+== Dependencies  ==
+python: http://www.python.org/
+
+PyZMQ: http://www.zeromq.org/bindings:python, it is the python version of ZMQ
+
+ProtoBuf : http://code.google.com/p/protobuf/
+
+libzmq: http://www.zeromq.org, it is the C version of ZMQ
+
+scons: http://www.scons.org/, it is the build system
+
+== Install ==
+Install python/scons/libzmq/pyzmq/protobuf......
+
+=== Compile libarabcpp ===
+libarabcpp is the arab library, which is used for implementing C++ service server
+
+cd 30-Cms/arab/arabcpp/build_arab
+scons -f ../../../../10-Common/build/SConstruct -I./
+
+=== Install arabpy ===
+cd 30-Cms/arab/arabpy
+sudo python setup.py install # sudo is need only when you are not admin on Linux OS
+
+== Usage ==
+To Be Completed......
+
+== About ==
+Author: zhangyingneng@gmail.com when he was at Kedacom(http://kedacom.com)
