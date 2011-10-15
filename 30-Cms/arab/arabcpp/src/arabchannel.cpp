@@ -3,7 +3,7 @@
  *
  */
 #include <sstream>
-#include <zmq/zmq.h>
+#include <zmq.h>
 #include <google/protobuf/descriptor.h>
 #include "cbb/config/osconfig.h"
 #include "arab/arabchannel.h"

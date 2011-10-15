@@ -10,7 +10,7 @@
 #include <google/protobuf/message.h>
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/stubs/common.h>
-#include <zmq/zmq.hpp>
+#include <zmq.hpp>
 #include "arab/arabserver.h"
 #include "arab/types.pb.h"
 using namespace std;

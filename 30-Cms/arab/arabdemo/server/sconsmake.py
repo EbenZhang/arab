@@ -56,7 +56,7 @@ def files_finder(path):
   return glob(path.replace('/',os.sep))
 source_files = files_finder('./echo_server.cpp')
 source_files += files_finder('./*.cc')
-install_dir_base = '../../../../10-Common/'
+install_dir_base = '../../../../10-Common/version/'
 install_dir_linux_debug = install_dir_base + "/debug/linux/" + program_name_debug + "/"
 install_dir_linux_release = install_dir_base + "/release/linux/" + program_name_release + "/"
 install_dir_win32_debug = install_dir_base + "/debug/win32/" + program_name_debug + "/"
