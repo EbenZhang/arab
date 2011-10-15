@@ -48,6 +48,7 @@ public:
 
 int main(int argc, char *argv[])
 {
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
   Arab::CServer rpc_server("127.0.0.1", 5555);
   google::protobuf::Service *service = new EchoServiceImpl();
   rpc_server.RegisterService(service);
